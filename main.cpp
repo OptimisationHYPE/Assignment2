@@ -149,14 +149,7 @@ Matrix operator*(const Matrix& a, const double coef) { // mult Matrix by coefici
             copy[i][j] *= coef;
     return Matrix(copy);
 }
-Matrix operator +(const Matrix& a, const Matrix& b) { // Matrix sum
-    matrix_t result(a.n, row_t(a.m));
-    for (int i = 0; i < result.size(); i++)
-        for (int j = 0; j < result[0].size(); j++) {
-            result[i][j] = a.data[i][j] + b.data[i][j];
-        }
-    return Matrix(result);
-}
+Matrix operator +(const Matrix& a, const Matrix& b) { return a - (b*-1);}// Matrix sum
 
 using std::cin, std::cout;
 
