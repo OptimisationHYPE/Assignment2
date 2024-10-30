@@ -35,6 +35,7 @@ inline double operator*(const row_t& a, const row_t& b) { // dot product
     return acum;
 }
 
+
 class Matrix {
 public:
     size_t n, m;
@@ -139,16 +140,36 @@ Matrix operator -(const Matrix& a, const Matrix& b) { // Matrix multiplication
         }
     return Matrix(result);
 }
+Matrix operator*(const Matrix& a, const double coef) { // mult Matrix by coeficient
+    matrix_t copy = a.data;
+    for (int i = 0; i < copy.size(); i++)
+        for (int j = 0; j< copy[0].size();j++)
+            copy[i][j] *= coef;
+    return Matrix(copy);
+}
+Matrix operator +(const Matrix& a, const Matrix& b) { // Matrix sum
+    matrix_t result(a.n, row_t(a.m));
+    for (int i = 0; i < result.size(); i++)
+        for (int j = 0; j < result[0].size(); j++) {
+            result[i][j] = a.data[i][j] + b.data[i][j];
+        }
+    return Matrix(result);
+}
 
 using std::cin, std::cout;
 
 double min(Matrix& m){
-    double ans = 
+    double ans = 0;
+    for (row_t row: m.data)
+        for (auto element: row) 
+            ans = std::min(ans, element);
+    return ans;
 }
 
 int main() {
     std::ios::sync_with_stdio(false);
     Matrix C = Matrix::input(), A = Matrix:: input() , x = Matrix::input(), b;
+    int n = C.m;
     double eps = 0.001, alph1 = 0.5, alph2 = 0.9;
     while (true) {
         Matrix D = Matrix::diag(x);
@@ -157,7 +178,10 @@ int main() {
         Matrix P = I - A1.T() * (A1 * A1.T()).Inverse() * A1;
         Matrix cp = P *(D * C.T());
         cout << cp << '\n';
-
+        double v = std::abs(min(cp)),coef = alph1 / v;
+        Matrix x1 = Matrix({row_t(n,1)}).T(); // vector of ones vretical
+        Matrix cpm = cp*coef;
+        Matrix x_new = x1 + cpm;
         break;
     }
 
