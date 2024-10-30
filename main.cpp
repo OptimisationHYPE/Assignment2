@@ -4,6 +4,7 @@
 #include <numeric>
 #include <iomanip>
 #include <stdexcept>
+#include <cmath>
 
 std::string buffer;
 typedef std::vector<double> row_t;
@@ -34,6 +35,7 @@ inline double operator*(const row_t& a, const row_t& b) { // dot product
     for (int i = 0; i < a.size(); i++)acum += a[i] * b[i];
     return acum;
 }
+
 
 
 class Matrix {
@@ -166,25 +168,37 @@ double min(Matrix& m){
     return ans;
 }
 
-int main() {
-    std::ios::sync_with_stdio(false);
-    Matrix C = Matrix::input(), A = Matrix:: input() , x = Matrix::input(), b;
+double distance(const row_t& x_, const row_t& x) {
+    if (x_.size() != x.size()) throw std::invalid_argument("Vectors must be of the same length to calculate distance");
+    double sum_of_squares = 0;
+    for (size_t i = 0; i < x_.size(); ++i) 
+        sum_of_squares += (x_[i] - x[i]) * (x_[i] - x[i]);
+    return std::sqrt(sum_of_squares);
+}
+Matrix interPointAlgorithm(Matrix& C, Matrix& A, Matrix x, double alpha, double eps){
     int n = C.m;
-    double eps = 0.001, alph1 = 0.5, alph2 = 0.9;
     while (true) {
         Matrix D = Matrix::diag(x);
         Matrix A1 = A * D;
         Matrix I = Matrix::identity(x.m);
         Matrix P = I - A1.T() * (A1 * A1.T()).Inverse() * A1;
         Matrix cp = P *(D * C.T());
-        cout << cp << '\n';
-        double v = std::abs(min(cp)),coef = alph1 / v;
-        Matrix x1 = Matrix({row_t(n,1)}).T(); // vector of ones vretical
+        double v = std::abs(min(cp)),coef = alpha / v;
+        Matrix x1 = Matrix({row_t(n,1)}).T(); // vector of ones vertical
         Matrix cpm = cp*coef;
         Matrix x_new = x1 + cpm;
-        break;
+        Matrix x_= D * x_new;
+        cout << x_ << '\n';
+        if (distance(x[0],x_(0)) < eps)return x_;
+        x = x_.T();
     }
+}
 
+int main() {
+    std::ios::sync_with_stdio(false);
+    Matrix C = Matrix::input(), A = Matrix:: input() , x = Matrix::input(), b;
+    double eps =  0.00001, alph1 = 0.5, alph2 = 0.9;
+    interPointAlgorithm(C,A,x,alph1,eps);
     return 0;
 }
 /*
