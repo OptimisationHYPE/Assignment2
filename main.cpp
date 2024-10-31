@@ -1,7 +1,6 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <numeric>
 #include <iomanip>
 #include <stdexcept>
 #include <cmath>
@@ -35,8 +34,16 @@ inline double operator*(const row_t& a, const row_t& b) { // dot product
     for (int i = 0; i < a.size(); i++)acum += a[i] * b[i];
     return acum;
 }
-
-
+inline row_t operator-(const row_t& a, const row_t& b) { // substract operator
+    row_t ans = {};
+    for (int i = 0; i < a.size(); i++)ans.push_back(a[i] - b[i]);
+    return ans;
+}
+inline double operator ^(const row_t& a, const int ord) { // norm operation
+    double acum = 0;
+    for (auto e:a)acum+=pow(e,ord);
+    return acum;
+}
 
 class Matrix {
 public:
@@ -60,7 +67,8 @@ public:
     }
 
     static Matrix diag(Matrix& x) {
-        // Assume that x.n == 1
+        if (x.n != 1) throw std::invalid_argument("Matrix must be horizonal vector!");
+
         matrix_t temp(x.m, row_t(x.m, 0));
         for (int i = 0; i < x.m; i++)
             temp[i][i] = x.data[0][i];
@@ -80,7 +88,6 @@ public:
 
     Matrix Inverse() {
         if (n != m) throw std::invalid_argument("Matrix must be square to calculate inverse");
-
         Matrix augmented = *this;  // Copy the original matrix
         Matrix identity_matrix = Matrix::identity(n);
 
@@ -122,19 +129,18 @@ public:
     }
 };
 
-std::ostream& operator<<(std::ostream& os, Matrix& m) { return os << m.data; }
+std::ostream& operator<<(std::ostream& os,const Matrix& m) { return os << m.data; }
 std::istream& operator>>(std::istream& is, Matrix& m) { m = Matrix::input(is); }
 Matrix operator*(const Matrix& a, const Matrix& b) { // Matrix multiplication
-    // Assume that a.m == b.n
+    if (a.m != b.n) throw std::invalid_argument("Matrix sizes are invalid!");
     matrix_t result(a.n, row_t(b.m));
     for (int i = 0; i < result.size(); i++)
-        for (int j = 0; j < result[0].size(); j++) {
-            result[i][j] = a[i] * b(j);
-        }
+        for (int j = 0; j < result[0].size(); j++)
+            result[i][j] = a[i] * b(j); // a.row(i) * b.column(j)
     return Matrix(result);
 }
 Matrix operator -(const Matrix& a, const Matrix& b) { // Matrix multiplication
-    // Assume that a.m == b.m && a.n == b.n
+    if (a.m != b.m && a.n != b.n) throw std::invalid_argument("Matrix sizes are invalid!");
     matrix_t result(a.n, row_t(a.m));
     for (int i = 0; i < result.size(); i++)
         for (int j = 0; j < result[0].size(); j++) {
@@ -153,7 +159,7 @@ Matrix operator +(const Matrix& a, const Matrix& b) { return a - (b*-1);}// Matr
 
 using std::cin, std::cout;
 
-double min(Matrix& m){
+double min_negative(Matrix& m){
     double ans = 0;
     for (row_t row: m.data)
         for (auto element: row) 
@@ -161,47 +167,37 @@ double min(Matrix& m){
     return ans;
 }
 
-double distance(const row_t& x_, const row_t& x) {
-    if (x_.size() != x.size()) throw std::invalid_argument("Vectors must be of the same length to calculate distance");
-    double sum_of_squares = 0;
-    for (size_t i = 0; i < x_.size(); ++i) 
-        sum_of_squares += (x_[i] - x[i]) * (x_[i] - x[i]);
-    return std::sqrt(sum_of_squares);
-}
-Matrix interPointAlgorithm(Matrix& C, Matrix& A, Matrix x, double alpha, double eps){
-    int n = C.m;
+Matrix interiorPointAlgorithm(Matrix& C, Matrix& A, Matrix x, double alpha, double eps, bool verbose = false){
+    if (verbose)
+        cout << "Run Interior Point Algorithm with parameters (eps= "<< eps << " alpha= "<< alpha <<"):\n";
+    
+    int n = C.m, iter = 1;
     while (true) {
         Matrix D = Matrix::diag(x);
         Matrix A1 = A * D;
         Matrix I = Matrix::identity(x.m);
         Matrix P = I - A1.T() * (A1 * A1.T()).Inverse() * A1;
         Matrix cp = P *(D * C.T());
-        double v = std::abs(min(cp)),coef = alpha / v;
-        Matrix x1 = Matrix({row_t(n,1)}).T(); // vector of ones vertical
+        double v = std::abs(min_negative(cp)),coef = alpha / v;
         Matrix cpm = cp*coef;
-        Matrix x_new = x1 + cpm;
+        Matrix x_new = Matrix({row_t(n,1)}).T() + cpm;
         Matrix x_= D * x_new;
-        cout << x_ << '\n';
-        if (distance(x[0],x_(0)) < eps)return x_;
+        if (verbose)
+            cout << "Iteratoin " << iter++ << ", x= " << x_.T();
+        if (((x[0] - x_(0)) ^ 2)  < eps) // 2nd order norm from vector substractions
+            return x_;
         x = x_.T();
     }
 }
 
 int main() {
     std::ios::sync_with_stdio(false);
-    Matrix C = Matrix::input(), A = Matrix:: input() , x = Matrix::input(), b;
-    double eps =  0.00001, alph1 = 0.5, alph2 = 0.9;
-    interPointAlgorithm(C,A,x,alph1,eps);
+    cout << std::fixed;
+    cout.precision(3);
+    Matrix C = Matrix::input(), A = Matrix:: input() , x = Matrix::input(), b = Matrix::input();
+    double eps =  0.00001, alpha=0.5;
+    cin >> eps >> alpha;
+    Matrix ans = interiorPointAlgorithm(C,A,x,alpha,eps);
+    cout << ans << '\n';
     return 0;
 }
-/*
-1 1 0 0
-
-2 4 1 0
-1 3 0 -1
-
-0.5 3.5 1 2
-
-
-
-*/
