@@ -30,3 +30,7 @@
 *.exe
 *.out
 *.app
+*.vscode
+tester/__pycache__/*
+main
+simplex

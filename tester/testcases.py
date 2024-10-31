@@ -7,7 +7,7 @@ from typing import Optional
 class TestData:
     C: list[float]
     A: list[list[float]]
-    eps: float
+    eps: float = 0.1
     x: Optional[list[float]] = None
     b: Optional[list[float]] = None
     alpha: Optional[float] = None
@@ -39,7 +39,6 @@ test1 = TestPair(
             [1,3], 
         ],
         b= [16, 9],
-        eps= 0.1
     ),
     interior=TestData(
         C= [1, 1, 0, 0], 
@@ -48,11 +47,92 @@ test1 = TestPair(
             [1, 3, 0, 1], 
         ],
         x= [2,1,1,-4],
-        eps= 0.1
+    )
+)
+
+test2 = TestPair(
+    simplex=TestData(
+        C= [-9, 2, -4], 
+        A= [
+            [2, 4, 1],  
+            [3, -3, 4],
+            [5, 2, -1],  
+        ],
+        b= [6, 3, 7],
+    ),
+    interior=TestData(
+        C= [-9, 2, -4, 0, 0, 0], 
+        A= [
+            [2, 4, 1, 1, 0, 0],  
+            [3, -3, 4, 0, 1, 0],
+            [5, 2, -1, 0, 0, 1],  
+        ],
+        x= [1, 3, 2, 4, 5, 2],
+    )
+)
+
+test3 = TestPair(
+    simplex=TestData(
+        C= [3, 1], 
+        A= [
+            [2, 1],  
+            [1, 2],
+        ],
+        b= [6, 4],
+    ),
+    interior=TestData(
+        C= [3, 1, 0, 0], 
+        A= [
+            [2, 1, 1, 0],  
+            [1, 2, 0, 1],
+        ],
+        x= [1, 1, 1, 1],
+    )
+)
+test4 = TestPair(
+    simplex=TestData(
+        C= [9, 10, 16], 
+        A= [
+            [18, 15, 12],  
+            [6, 4, 8],
+            [5, 3, 3],
+        ],
+        b = [360, 192, 180]
+    ),
+    interior=TestData(
+        C= [9, 10, 16, 0, 0, 0], 
+        A= [
+            [18, 15, 12, 1, 0, 0],  
+            [6, 4, 8, 0, 1, 0],
+            [5, 3, 3, 0, 0, 1],
+        ],
+        x= [3, 2, 4, 1, .5, 4],
+    )
+)
+test5 = TestPair(
+    simplex=TestData(
+        C= [-1, 1], 
+        A= [
+            [1, 2],  
+            [2, 1],
+        ],
+        b = [20, 20]
+    ),
+    interior=TestData(
+        C= [-1, 1, 0, 0], 
+        A= [
+            [1, 2, 1, 0],  
+            [2, 1, 0, 0],
+        ],
+        x= [.1, .1, .1, .1],
     )
 )
 
 
 testset = [
     test1,
+    test2,
+    test3,
+    test4,
+    test5
 ]

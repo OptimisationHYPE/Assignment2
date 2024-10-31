@@ -19,7 +19,7 @@ except Exception as e:
     print("During compilation there is some errors {e} try to change compiler in tester settings")    
 
 def solve(proc_name: str, data: TestData):
-    proc: subprocess.Popen = open_process(f"./{INTERIOR}")
+    proc: subprocess.Popen = open_process(f"./{proc_name}")
     print("-- Input --\n",data.__repr__(),sep='')
 
     proc.stdin.write(data.__repr__())
@@ -36,17 +36,18 @@ print("Start testing...")
 
 for index, test in enumerate(testset, 1):
     os.system("clear")
-    print(f"Test# {index} Interior Point Algo (alpha = 0.5)")
+    print(f"Test #({index}/{len(testset)})")
+    print(f"Test# {index} | Interior Point Algo (alpha = 0.5)")
     interior_data = test.interior
     interior_data.alpha = 0.5
     solve(proc_name=INTERIOR, data= interior_data)
 
-    print(f"Test# {index} Interior Point Algo (alpha = 0.9)")
+    print(f"Test# {index} | Interior Point Algo (alpha = 0.9)")
     interior_data.alpha = 0.9
     solve(proc_name=INTERIOR, data= interior_data)
     
-    print(f"Test# {index} Simplex method")
+    print(f"Test# {index} | Simplex method")
     simplex_data = test.simplex
-    solve(proc_name=SIMPLEX, data= simplex_data)
-    
-    input("Press Enter to display next test...")
+    solve(proc_name=SIMPLEX, data=simplex_data)
+    if (index != len(testset)):
+        input("Press Enter to display next test...")
