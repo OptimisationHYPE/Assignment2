@@ -130,7 +130,10 @@ public:
 };
 
 std::ostream& operator<<(std::ostream& os,const Matrix& m) { return os << m.data; }
-std::istream& operator>>(std::istream& is, Matrix& m) { m = Matrix::input(is); }
+std::istream& operator>>(std::istream& is, Matrix& m) { 
+    m = Matrix::input(is);
+    return is;
+}
 Matrix operator*(const Matrix& a, const Matrix& b) { // Matrix multiplication
     if (a.m != b.n) throw std::invalid_argument("Matrix sizes are invalid!");
     matrix_t result(a.n, row_t(b.m));
@@ -194,10 +197,21 @@ int main() {
     std::ios::sync_with_stdio(false);
     cout << std::fixed;
     cout.precision(3);
-    Matrix C = Matrix::input(), A = Matrix:: input() , x = Matrix::input(), b = Matrix::input();
+    Matrix C = Matrix::input(), A = Matrix:: input() , x = Matrix::input(), b;
     double eps =  0.00001, alpha=0.5;
     cin >> eps >> alpha;
-    Matrix ans = interiorPointAlgorithm(C,A,x,alpha,eps);
-    cout << ans << '\n';
+    Matrix ans = interiorPointAlgorithm(C,A,x,alpha,eps,true);
+    cout << ans.T();
+    cout << C * ans << '\n';
     return 0;
 }
+/*
+1 1 0 0
+
+2 4 1 0
+1 3 0 -1
+
+0.5 3.5 1 2
+
+0.0001 0.5
+*/
